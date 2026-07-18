@@ -1,0 +1,3 @@
+{
+  "body": "{\"attendees\":[\"alice.chen@example.com\",\"bob.martinez@example.com\",\"carol.nguyen@example.com\"],\"date\":\"2026-08-04\",\"start_time\":\"14:30\",\"duration_minutes\":45,\"location\":\"Conference Room B — 3rd Floor, 200 Park Ave, New York, NY 10166\",\"description\":\"Q3 product roadmap alignment. Agenda: milestone review, risk assessment, resource allocation for Phase 2 launch.\",\"suggested_times\":[{\"date\":\"2026-08-04\",\"start_time\":\"14:30\"},{\"date\":\"2026-08-05\",\"start_time\":\"10:00\"},{\"date\":\"2026-08-06\",\"start_time\":\"16:00\"}]}"
+}

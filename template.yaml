@@ -1,0 +1,76 @@
+# ─────────────────────────────────────────────────────────────
+#  template.yaml — AWS SAM Infrastructure-as-Code
+# ─────────────────────────────────────────────────────────────
+#  Declares a container-based Lambda function fronted by an
+#  API Gateway POST endpoint (/schedule).  The function is
+#  granted least-privilege access to a single Secrets Manager
+#  secret containing Google OAuth credentials.
+# ─────────────────────────────────────────────────────────────
+
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Description: >-
+  Herbert AWS — Nutrient webhook receiver that creates
+  Google Calendar events with email invitations.
+
+# ── Global defaults ──────────────────────────────────────────
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+
+# ── Parameters ───────────────────────────────────────────────
+
+Parameters:
+  SecretName:
+    Type: String
+    Default: herbert/google-oauth
+    Description: >-
+      Name of the Secrets Manager secret storing Google OAuth
+      credentials (client_id, client_secret, refresh_token).
+
+# ── Resources ────────────────────────────────────────────────
+
+Resources:
+
+  HerbertSchedulerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          SECRET_NAME: !Ref SecretName
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource:
+                - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${SecretName}-*"
+      Events:
+        ScheduleWebhook:
+          Type: Api
+          Properties:
+            Path: /schedule
+            Method: post
+    Metadata:
+      DockerTag: python3.11-v1
+      DockerContext: ./
+      Dockerfile: Dockerfile
+
+# ── Outputs ──────────────────────────────────────────────────
+
+Outputs:
+
+  WebhookEndpointUrl:
+    Description: >-
+      The live API Gateway endpoint URL for the /schedule webhook.
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/schedule"
+
+  FunctionArn:
+    Description: ARN of the deployed Lambda function.
+    Value: !GetAtt HerbertSchedulerFunction.Arn
